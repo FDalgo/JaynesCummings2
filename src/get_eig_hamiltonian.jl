@@ -6,25 +6,42 @@ function print_eigenvector(vec, precision)
 	println()
 end
 
-function eigenvalues_ham(hamiltonian, precision, print)
+function eigenvalues_ham(hamiltonian, precision, print, Braak_form)
 	size_ham = size(hamiltonian)
-	λ = eigfact!(sub(hamiltonian, 1:size_ham[1]-1, 1:size_ham[2]-1))
+	λ = eigfact!(view(hamiltonian, 1:size_ham[1]-2, 1:size_ham[2]-2))
+	states = Array{String}(length(λ[:values]))
 	#print_matrix(hamiltonian, 2)
 	if print
 		println("\n Eigenvalues:")
 		for i=1:size(λ[:values], 1)
 			@printf("#%d |     ", i)
-			println(round(λ[:values][i], precision))
+			@printf("%.2f \t current state |", round(λ[:values][i], precision))
+			str = ""
+			if Braak_form
+				if i%2 == 0
+					str = str * "+ "* join(convert(Int, floor((i-1)/2))) * ">"
+				else
+					str = str * "- " * join(convert(Int, floor(i/2))) * ">"
+				end
+			else
+				if i%2 == 0
+					str = str * "e, "* convert(Int, floor((i-1)/2))*">"
+				else
+					str = str * "g, " * convert(Int, floor(i/2)) *">"
+				end
+			end
+			println(str)
+			states[i] = str
 		end
-		println("Extra λ |  ", round(hamiltonian[size_ham[1], size_ham[2]], precision))
-	
+		#println("Extra λ |  ", round(hamiltonian[size_ham[1], size_ham[2]], precision))
+
 		println("\n Eigenvectors:")
 		for i=1:size(λ[:vectors], 2)
 			@printf("#%d |     ", i)
 			print_eigenvector(λ[:vectors][:, i], precision)
 		end
 	end
-	return λ
+	return λ#(λ, states)
 end
 
 function sort_eigs(eigs, unsorted_eigs, ε)

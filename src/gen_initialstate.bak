@@ -1,0 +1,64 @@
+function gen_initialstate(cutoffN,x...)
+
+  ketCoeff = zeros(Complex128,length(x),1)
+  parameterArray = zeros(Int64,length(x),2)
+
+  for i = 1:length(x)
+    str = x[i]
+    # Grabbing the coefficient in front of ket
+    coeff = str[1:search(str,'|')-1]
+    if isempty(coeff)
+      ketCoeff[i] = 1
+    elseif coeff == '-'
+      ketCoeff[i] = -1
+    else
+      ketCoeff[i] = eval(parse(coeff))
+    end
+
+    # Grabbig qubit state
+    if str[search(str,'|')+1] == 'g'
+      parameterArray[i,1] = 0
+    elseif str[search(str,'|')+1] == 'e'
+      parameterArray[i,1] = 1
+    else
+      error("Error, qubit state should be 'g' or 'e'")
+    end
+
+    # Grabbing resonator state
+    parameterArray[i,2] = eval(parse(str[search(str,',')+1:end-1]))
+  end
+
+  # Making sure that cutoffN is large enough
+  if cutoffN <=  maximum(parameterArray[:,2])
+    error("The size of the resonator space (cutoffN) must be at least the size of the larger number state plus one (due to zero state)!")
+  end
+
+  # Assembling the state matrix
+  
+  state = zeros(Complex128,2*cutoffN,2*cutoffN)
+
+  for i = 1:length(x)
+    for j = 1:length(x)
+      # Defining the ket
+      qubitPartKet = zeros(Complex128,2,1) # Initialising the qubit ket (2D)
+      qubitPartKet[parameterArray[i,1]+1] = 1 # Setting the vector as (1 0) for g or (0 1) for e
+      resonatorPartKet = zeros(Complex128,cutoffN,1) # Initialising the resonator ket (cutoffND)
+      resonatorPartKet[parameterArray[i,2]+1] = 1 # Setting the vector
+      ket = kron(qubitPartKet,resonatorPartKet) # Tensor product
+      # Defining the bra
+      qubitPartBra =zeros(Complex128,2,1)
+      qubitPartBra[parameterArray[j,1]+1] = 1
+      resonatorPartBra = zeros(Complex128,cutoffN,1)
+      resonatorPartBra[parameterArray[j,2]+1] = 1
+      bra = kron(qubitPartBra,resonatorPartBra)'
+      # Multiplying the initial ket with its complex conjugate to make
+      # the density matrix
+      state = state + ketCoeff[i]*ketCoeff[j]'*ket*bra
+    end
+  end
+
+  norm = 1/sum(abs(ketCoeff[:]).^2)
+  state = norm*state # Norming
+  info(size(state))
+  return state
+end
