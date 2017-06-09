@@ -16,14 +16,14 @@ function gen_hamiltonian(omegaQ,omegaR,g,cutoffN, strong_interaction, Braak)
   # frequency and g is the coupling.
   jaynesCummings = zeros(Complex128,2*cutoffN,2*cutoffN)
   jaynesCummings = jaynesCummings +
-     kron(h_bar .* omegaR .* ((a_dagger(cutoffN) * a(cutoffN))+half_matrix), identity) - # harmonic oscillator term
-     h_bar .*omegaQ .* kron(eye(cutoffN), sigmaZ)+   																		# qubit term
-     h_bar .* g .* ( kron(a(cutoffN), sigmaPlus) + kron(a_dagger(cutoffN), sigmaMinus) ); # interaction term
+     kron(h_bar .* omegaR .* ((a_dagger(cutoffN) * a(cutoffN))+half_matrix), identity) -	# harmonic oscillator term
+     h_bar .*omegaQ .* kron(eye(cutoffN), sigmaZ) +						# qubit term
+     h_bar .* g .* ( kron(a(cutoffN), sigmaPlus) + kron(a_dagger(cutoffN), sigmaMinus) )	# interaction term
 	if Braak
 		jaynesCummings-=h_bar .*omegaQ .* kron(eye(cutoffN), sigmaZ)
 	end
   if strong_interaction
-  	jaynesCummings+= h_bar.* g .* (kron(a(cutoffN), sigmaMinus) + kron(a_dagger(cutoffN), sigmaPlus))# strong interaction term
+  	jaynesCummings+= h_bar .* g .* (kron(a(cutoffN), sigmaMinus) + kron(a_dagger(cutoffN), sigmaPlus))# strong interaction term
  	end
   return jaynesCummings
 end
