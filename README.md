@@ -1,5 +1,5 @@
 # JaynesCummings2
-[![](https://travis-ci.org/enzotarta/JaynesCummings2.svg?branch=master)]
+![](https://travis-ci.org/enzotarta/JaynesCummings2.svg?branch=master)
 
 First of all I would like to thanks Jebej work (jebej/JaynesCummings.jl) who inspired this one.
 The main purpose of this packet is to perform research around Jaynes-Cummings model and extensions like Rabi.
